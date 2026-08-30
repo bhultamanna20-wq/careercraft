@@ -70,6 +70,8 @@ function Editor() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const [enhancing, setEnhancing] = useState(false);
   const [step, setStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState([]);
 
@@ -165,12 +167,36 @@ function Editor() {
   };
 
   // Summary
-  const saveSummaryAndNext = async () => {
+  const handleEnhanceSummary = async () => {
+    if (!summary || summary.trim().length === 0) return;
+    setEnhancing(true);
+    try {
+      const res = await fetch('/api/enhance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: summary, type: 'summary' }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert('AI enhance failed: ' + (data.error || 'Unknown error'));
+      } else {
+        setSummary(data.enhancedText);
+      }
+    } catch (err) {
+      alert('AI enhance failed: ' + err.message);
+    } finally {
+      setEnhancing(false);
+    }
+  };
+
+    const saveSummaryAndNext = async () => {
     setSaving(true);
     await updateResumeMeta(resumeId, { summary });
     setSaving(false);
     markCompleteAndGo(2, 3);
   };
+
+  // Education
 
   // Education
   const handleNewEducationChange = (e) => setNewEducation({ ...newEducation, [e.target.name]: e.target.value });
@@ -337,13 +363,20 @@ function Editor() {
                 <p className="text-sm text-gray-500 mb-4">
                   A short introduction giving employers a quick overview of your qualifications.
                 </p>
-                <textarea
+                 <textarea
                   value={summary}
                   onChange={(e) => setSummary(e.target.value)}
                   placeholder="e.g. Motivated Computer Science graduate with hands-on experience building web applications..."
                   rows="6"
-                  className="w-full mb-6 p-3 border rounded"
+                  className="w-full mb-3 p-3 border rounded"
                 />
+                <button
+                  onClick={handleEnhanceSummary}
+                  disabled={enhancing || !summary}
+                  className="mb-6 bg-purple-100 text-purple-700 px-4 py-2 rounded hover:bg-purple-200 disabled:opacity-50"
+                >
+                  ✨ {enhancing ? 'Enhancing...' : 'AI Enhance'}
+                </button>
                 <div className="flex justify-between">
                   <button onClick={() => setStep(1)} className="text-gray-500">Back</button>
                   <button onClick={saveSummaryAndNext} disabled={saving} className="bg-teal-700 text-white px-6 py-2 rounded hover:bg-teal-800">
