@@ -6,6 +6,9 @@ import Dashboard from './pages/Dashboard';
 import Editor from './pages/Editor';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import JobMatches from './pages/JobMatches';
+import Preview from './pages/Preview';
+
 
 function App() {
   return (
@@ -18,9 +21,12 @@ function App() {
         <Route path="/editor/:resumeId" element={<Editor />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-      </Routes>
-    </BrowserRouter>
+        <Route path="/jobs/:resumeId" element={<JobMatches />} />
+        <Route path="/preview/:resumeId" element={<Preview />} />
+        </Routes>
+   </BrowserRouter>
   );
 }
+
 
 export default App;
