@@ -148,17 +148,21 @@ function Editor() {
   // Personal Info
   const handlePersonalInfoChange = (e) => setPersonalInfo({ ...personalInfo, [e.target.name]: e.target.value });
   const savePersonalAndNext = async () => {
-  setSaving(true);
-  try {
-    await savePersonalDetails(resumeId, personalInfo);
-    markCompleteAndGo(1, 2);
-  } catch (err) {
-    console.error('Save failed:', err);
-    alert('Save failed: ' + err.message);
-  } finally {
-    setSaving(false);
-  }
-};
+    setSaving(true);
+    try {
+      const cleanedInfo = {
+        ...personalInfo,
+        dob: personalInfo.dob || null,
+      };
+      await savePersonalDetails(resumeId, cleanedInfo);
+      markCompleteAndGo(1, 2);
+    } catch (err) {
+      console.error('Save failed:', err);
+      alert('Save failed: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // Summary
   const saveSummaryAndNext = async () => {
