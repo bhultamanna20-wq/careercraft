@@ -78,8 +78,7 @@ function Editor() {
   });
 
   const [summary, setSummary] = useState('');
-  
-  const [enhancing, setEnhancing] = useState(false);
+
   const [educationList, setEducationList] = useState([]);
   const [newEducation, setNewEducation] = useState({ degree: '', college: '', university: '', passing_year: '', percentage: '' });
 
@@ -149,11 +148,17 @@ function Editor() {
   // Personal Info
   const handlePersonalInfoChange = (e) => setPersonalInfo({ ...personalInfo, [e.target.name]: e.target.value });
   const savePersonalAndNext = async () => {
-    setSaving(true);
+  setSaving(true);
+  try {
     await savePersonalDetails(resumeId, personalInfo);
-    setSaving(false);
     markCompleteAndGo(1, 2);
-  };
+  } catch (err) {
+    console.error('Save failed:', err);
+    alert('Save failed: ' + err.message);
+  } finally {
+    setSaving(false);
+  }
+};
 
   // Summary
   const saveSummaryAndNext = async () => {
@@ -162,48 +167,7 @@ function Editor() {
     setSaving(false);
     markCompleteAndGo(2, 3);
   };
-  
-  const handleEnhanceSummary = async () => {
-    if (!summary.trim()) return;
-    setEnhancing(true);
-    try {
-      const res = await fetch('/api/enhance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: summary, type: 'summary' }),
-      });
-      const data = await res.json();
-      if (data.enhancedText) {
-        setSummary(data.enhancedText);
-      } else {
-        alert('AI enhance failed: ' + (data.error || 'Unknown error'));
-      }
-    } catch (err) {
-      alert('AI enhance failed. This feature only works after deploying to Vercel.');
-    }
-    setEnhancing(false);
-  };
 
-  const handleEnhanceExperience = async () => {
-    if (!newExperience.description.trim()) return;
-    setEnhancing(true);
-    try {
-      const res = await fetch('/api/enhance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: newExperience.description, type: 'experience' }),
-      });
-      const data = await res.json();
-      if (data.enhancedText) {
-        setNewExperience({ ...newExperience, description: data.enhancedText });
-      } else {
-        alert('AI enhance failed: ' + (data.error || 'Unknown error'));
-      }
-    } catch (err) {
-      alert('AI enhance failed. This feature only works after deploying to Vercel.');
-    }
-    setEnhancing(false);
-  };
   // Education
   const handleNewEducationChange = (e) => setNewEducation({ ...newEducation, [e.target.name]: e.target.value });
   const handleAddEducation = async () => {
@@ -369,20 +333,13 @@ function Editor() {
                 <p className="text-sm text-gray-500 mb-4">
                   A short introduction giving employers a quick overview of your qualifications.
                 </p>
-                                <textarea
+                <textarea
                   value={summary}
                   onChange={(e) => setSummary(e.target.value)}
                   placeholder="e.g. Motivated Computer Science graduate with hands-on experience building web applications..."
                   rows="6"
-                  className="w-full mb-3 p-3 border rounded"
+                  className="w-full mb-6 p-3 border rounded"
                 />
-                <button
-                  onClick={handleEnhanceSummary}
-                  disabled={enhancing || !summary.trim()}
-                  className="mb-6 bg-purple-100 text-purple-700 text-sm px-4 py-2 rounded-md font-medium hover:bg-purple-200 disabled:opacity-50"
-                >
-                  {enhancing ? '✨ Enhancing...' : '✨ AI Enhance'}
-                </button>
                 <div className="flex justify-between">
                   <button onClick={() => setStep(1)} className="text-gray-500">Back</button>
                   <button onClick={saveSummaryAndNext} disabled={saving} className="bg-teal-700 text-white px-6 py-2 rounded hover:bg-teal-800">
@@ -509,23 +466,8 @@ function Editor() {
                     <input type="date" name="start_date" value={newExperience.start_date} onChange={handleNewExperienceChange} className="w-1/2 p-2 border rounded" />
                     <input type="date" name="end_date" value={newExperience.end_date} onChange={handleNewExperienceChange} className="w-1/2 p-2 border rounded" />
                   </div>
-                  <textarea name="description" placeholder="Description of your role" value={newExperience.description} onChange={handleNewExperienceChange} className="w-full mb-3 p-2 border rounded" rows="3" />
-                  <button
-                    onClick={handleEnhanceExperience}
-                    disabled={enhancing || !newExperience.description.trim()}
-                    className="mb-3 bg-purple-100 text-purple-700 text-sm px-4 py-2 rounded-md font-medium hover:bg-purple-200 disabled:opacity-50"
-                  >
-                    {enhancing ? '✨ Enhancing...' : '✨ AI Enhance'}
-                  </button>
-                  <br />
+                  <textarea name="description" placeholder="Description of your role" value={newExperience.description} onChange={handleNewExperienceChange} className="w-full mb-4 p-2 border rounded" rows="3" />
                   <button onClick={handleAddExperience} className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">+ Add Experience</button>
-                  <button
-                    onClick={handleEnhanceExperience}
-                    disabled={enhancing || !newExperience.description.trim()}
-                    className="mt-2 bg-purple-100 text-purple-700 text-sm px-4 py-2 rounded-md font-medium hover:bg-purple-200 disabled:opacity-50"
-                  >
-                    {enhancing ? '✨ Enhancing...' : '✨ AI Enhance'}
-                  </button>
                 </div>
                 <div className="flex justify-between mt-6">
                   <button onClick={() => setStep(5)} className="text-gray-500">Back</button>
