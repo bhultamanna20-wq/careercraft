@@ -228,17 +228,8 @@ export async function uploadPhoto(userId, file) {
 }
 export const getTemplates = async () => {
   return [
-    {
-      id: "modern",
-      name: "Modern",
-    },
-    {
-      id: "professional",
-      name: "Professional",
-    },
-    {
-      id: "simple",
-      name: "Simple",
-    },
+    { template_id: "modern", template_name: "Modern", template_style: "sidebar" },
+    { template_id: "professional", template_name: "Professional", template_style: "classic" },
+    { template_id: "simple", template_name: "Simple", template_style: "classic" },
   ];
 };
